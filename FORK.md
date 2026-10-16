@@ -40,8 +40,11 @@
 
 - 只用 `.github/workflows/fork-ci.yml`：push 到 `local`、提 PR 时在 macOS 上跑 `cargo test --locked`。
   上游没有这个文件，不会冲突。
-- 上游的 `test.yml`、`release.yml`、`sync-release.yml` 在 fork 上用 `gh workflow disable` 停用，
-  不改文件。停用状态保存在 GitHub 上，上游更新这些文件后仍然有效。
+- 上游的 workflow 在 fork 上用 `gh workflow disable` 停用，不改文件。停用状态保存在 GitHub 上，
+  上游更新这些文件后仍然有效。目前 `Tests`（`test.yml`）已停用。
+- GitHub 只在某个 workflow 第一次被触发时才注册它，未注册的没法提前停用。`release.yml`（推送 `v*`
+  tag 触发）和 `sync-release.yml`（发布 release 触发）至今没被触发过，所以未注册：不要把 `v*` tag
+  推到 origin，也不要在 fork 上发布 release。万一触发了，马上停用并取消那次运行。
 - 上游新增 workflow 时，它在 fork 上默认是启用的。每次同步后执行
   `gh workflow list -R nanvon/waku --all` 检查，需要时 `gh workflow disable -R nanvon/waku <名称>`。
   `gh` 命令一律带 `-R nanvon/waku`，避免误操作到上游仓库。
