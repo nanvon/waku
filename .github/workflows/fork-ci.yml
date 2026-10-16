@@ -1,0 +1,48 @@
+# [fork] 本 fork 自己的 CI，上游没有这个文件，不会产生合并冲突。
+# 上游的 test.yml / release.yml / sync-release.yml 在 fork 上已停用，见 FORK.md。
+name: Fork CI
+
+on:
+  push:
+    branches: [local]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fork-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Rust (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install 1.96.0 --profile minimal
+          rustup default 1.96.0
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache Cargo
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: macos-rust-1.96.0-cargo-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            macos-rust-1.96.0-cargo-
+
+      - name: Run tests
+        run: cargo test --locked

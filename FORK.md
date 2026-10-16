@@ -34,7 +34,17 @@
 
 - 每次改完：`cargo check` 通过，并在 dev watcher 重新构建后的 debug app 里确认效果。
 - 改到逻辑代码（非纯样式、文案）时：再跑相关模块的测试，例如 `cargo test <测试名>`。
-- 同步上游、push 之前：跑完整测试。
+- 同步上游、push 之前：完整测试交给 CI（见下文），CI 通过才算同步完成。
+
+## CI
+
+- 只用 `.github/workflows/fork-ci.yml`：push 到 `local`、提 PR 时在 macOS 上跑 `cargo test --locked`。
+  上游没有这个文件，不会冲突。
+- 上游的 `test.yml`、`release.yml`、`sync-release.yml` 在 fork 上用 `gh workflow disable` 停用，
+  不改文件。停用状态保存在 GitHub 上，上游更新这些文件后仍然有效。
+- 上游新增 workflow 时，它在 fork 上默认是启用的。每次同步后执行
+  `gh workflow list -R nanvon/waku --all` 检查，需要时 `gh workflow disable -R nanvon/waku <名称>`。
+  `gh` 命令一律带 `-R nanvon/waku`，避免误操作到上游仓库。
 
 ## 同步上游
 
@@ -53,7 +63,7 @@ git switch local && git rebase main
   （git 配置不随仓库走，新 clone 要重新设置）。同样的冲突解决过一次会被记住。
 - `Cargo.lock` 冲突不手工合并：取上游版本后重新生成。
 - 完成后用 `git diff main...local -- . ':!FORK.md'` 检查全部 fork 改动，`cargo check` 通过后
-  `git push --force-with-lease origin local`。
+  `git push --force-with-lease origin local`，等 Fork CI 通过，再按上文检查有没有新增 workflow。
 - 出问题时回到备份：`git reset --hard fork-backup/<时间>`。
 
 ## 功能记录
@@ -64,3 +74,4 @@ git switch local && git rebase main
 | --- | --- | --- | --- |
 | fork 维护规则 | 本文件，以及 `AGENTS.md` 顶部的引用 | `FORK.md`、`AGENTS.md` | — |
 | 关闭官方自动更新 | release 构建不启动 Sparkle，避免官方更新包覆盖本 fork；`WAKU_FORCE_UPDATER=1` 可临时恢复 | `src/updater.rs`（macOS `Updater::init`） | release 包菜单里没有 "Check for Updates"，启动后不发起更新检查 |
+| Fork CI | 只在 macOS 上跑测试，替代上游的三平台 CI | `.github/workflows/fork-ci.yml` | push 到 `local` 后 Actions 里只有 Fork CI 在运行，并且通过 |
