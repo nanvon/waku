@@ -1616,6 +1616,8 @@ pub struct Waku {
     fps_last_frame: Instant,
     fps_frame_count: u64,
     fps_value: u32,
+    /// [fork] adaptive content width; see `fork_content_width`.
+    content_max_width: f32,
 }
 
 mod activity_diff;
@@ -1646,6 +1648,7 @@ mod transcript_view;
 mod usage_meter;
 mod usage_page;
 mod window_chrome;
+mod fork_content_width; // [fork] adaptive content width
 
 pub use autocomplete::init as init_composer_autocomplete;
 use background_work::{
@@ -3052,6 +3055,7 @@ impl Waku {
                 fps_last_frame: Instant::now(),
                 fps_frame_count: 0,
                 fps_value: 0,
+                content_max_width: CONTENT_MAX_WIDTH, // [fork] adaptive content width
             }
         });
         navigation_rail.update(cx, |rail, _| rail.set_waku(entity.downgrade()));

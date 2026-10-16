@@ -105,7 +105,7 @@ impl Waku {
             div().px(px(20.0)).pb(px(8.0)).child(
                 div()
                     .w_full()
-                    .max_w(px(CONTENT_MAX_WIDTH))
+                    .max_w(px(self.content_max_width)) // [fork] adaptive content width
                     .mx_auto()
                     .p(px(12.0))
                     .rounded(px(12.0))
@@ -346,7 +346,7 @@ impl Waku {
             div()
                 .id(SharedString::from(format!("user-input-{request_id}")))
                 .w_full()
-                .max_w(px(CONTENT_MAX_WIDTH))
+                .max_w(px(self.content_max_width)) // [fork] adaptive content width
                 .mx_auto()
                 .px(px(14.0))
                 .pt(px(12.0))
@@ -486,7 +486,7 @@ impl Waku {
         div().px(px(20.0)).pb(px(8.0)).child(
             div()
                 .w_full()
-                .max_w(px(CONTENT_MAX_WIDTH))
+                .max_w(px(self.content_max_width)) // [fork] adaptive content width
                 .mx_auto()
                 .p(px(13.0))
                 .rounded(px(12.0))
@@ -2681,7 +2681,7 @@ impl Waku {
             div().flex_none().px(px(20.0)).child(
                 div()
                     .w_full()
-                    .max_w(px(CONTENT_MAX_WIDTH))
+                    .max_w(px(self.content_max_width)) // [fork] adaptive content width
                     .mx_auto()
                     .px(px(14.0))
                     .child(
@@ -2737,7 +2737,7 @@ impl Waku {
         div().flex_none().px(px(20.0)).child(
             div()
                 .w_full()
-                .max_w(px(CONTENT_MAX_WIDTH))
+                .max_w(px(self.content_max_width)) // [fork] adaptive content width
                 .mx_auto()
                 .rounded(px(13.0))
                 .border_1()
@@ -3462,7 +3462,7 @@ impl Waku {
             .child(
                 div()
                     .w_full()
-                    .max_w(px(CONTENT_MAX_WIDTH))
+                    .max_w(px(self.content_max_width)) // [fork] adaptive content width
                     .mx_auto()
                     .h(px(28.0))
                     // The chip contributes 7px, lining its icon up with the

@@ -138,6 +138,7 @@ impl Waku {
         );
         self.sidebar_rendered_width = sidebar;
         self.right_panel_rendered_width = right_panel;
+        self.sync_content_max_width(window); // [fork] adaptive content width
         let sliding = self.panels_sliding();
         if was_sliding && !sliding {
             // The observer gate held root-state fan-out away from any island

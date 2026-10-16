@@ -78,3 +78,4 @@ git switch local && git rebase main
 | fork 维护规则 | 本文件，以及 `AGENTS.md` 顶部的引用 | `FORK.md`、`AGENTS.md` | — |
 | 关闭官方自动更新 | release 构建不启动 Sparkle，避免官方更新包覆盖本 fork；`WAKU_FORCE_UPDATER=1` 可临时恢复 | `src/updater.rs`（macOS `Updater::init`） | release 包菜单里没有 "Check for Updates"，启动后不发起更新检查 |
 | Fork CI | 只在 macOS 上跑测试，替代上游的三平台 CI | `.github/workflows/fork-ci.yml` | push 到 `local` 后 Actions 里只有 Fork CI 在运行，并且通过 |
+| 自适应内容宽度 | 对话列和输入框的最大宽度随对话区放宽：对话区减去两侧导航条留白（各 76px），最小 720px、不设上限；窄窗口与上游一致 | `src/app/fork_content_width.rs`；`src/app.rs`（mod、`content_max_width` 字段）、`src/app/render.rs`、`src/app/transcript.rs`、`src/app/transcript_view.rs`、`src/app/composer.rs` 中替换 `CONTENT_MAX_WIDTH` 的位置 | 宽窗口下消息和输入框铺满对话区（两侧各留 76px），左侧导航条仍显示；窄窗口与原来一致 |

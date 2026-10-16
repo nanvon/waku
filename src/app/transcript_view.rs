@@ -1402,7 +1402,7 @@ impl Waku {
             .child(
                 div()
                     .w_full()
-                    .max_w(px(CONTENT_MAX_WIDTH))
+                    .max_w(px(self.content_max_width)) // [fork] adaptive content width
                     .min_w_0()
                     .child(inner),
             );
