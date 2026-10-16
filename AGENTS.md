@@ -1,5 +1,9 @@
 # Waku development guidance
 
+<!-- [fork] This repository is a personal fork. Read FORK.md before changing anything. -->
+This repository is a personal fork of egoist/waku. Before making any change, read
+[FORK.md](FORK.md): it defines how fork changes must be written and how upstream is synced.
+
 ## Development runtime
 
 - Assume `bun ./scripts/dev.ts` is already running and owns the current
