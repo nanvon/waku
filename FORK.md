@@ -63,3 +63,4 @@ git switch local && git rebase main
 | 功能 | 用途 | 涉及文件 | 验收方式 |
 | --- | --- | --- | --- |
 | fork 维护规则 | 本文件，以及 `AGENTS.md` 顶部的引用 | `FORK.md`、`AGENTS.md` | — |
+| 关闭官方自动更新 | release 构建不启动 Sparkle，避免官方更新包覆盖本 fork；`WAKU_FORCE_UPDATER=1` 可临时恢复 | `src/updater.rs`（macOS `Updater::init`） | release 包菜单里没有 "Check for Updates"，启动后不发起更新检查 |

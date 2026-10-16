@@ -591,6 +591,10 @@ mod macos {
             if cfg!(debug_assertions) && !forced && !preview {
                 return None;
             }
+            // [fork] 自用构建不接收官方更新，否则官方包会覆盖本 fork。
+            if !cfg!(debug_assertions) && !forced {
+                return None;
+            }
 
             let mtm = MainThreadMarker::new()?;
             let library = sparkle_library_path()?;
