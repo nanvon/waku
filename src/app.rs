@@ -1618,6 +1618,8 @@ pub struct Waku {
     fps_value: u32,
     /// [fork] adaptive content width; see `fork_content_width`.
     content_max_width: f32,
+    /// [fork] token speed; see `fork_token_speed`.
+    fork_token_speeds: HashMap<Uuid, fork_token_speed::TokenSpeed>,
 }
 
 mod activity_diff;
@@ -1649,6 +1651,7 @@ mod usage_meter;
 mod usage_page;
 mod window_chrome;
 mod fork_content_width; // [fork] adaptive content width
+mod fork_token_speed; // [fork] token speed
 
 pub use autocomplete::init as init_composer_autocomplete;
 use background_work::{
@@ -3056,6 +3059,7 @@ impl Waku {
                 fps_frame_count: 0,
                 fps_value: 0,
                 content_max_width: CONTENT_MAX_WIDTH, // [fork] adaptive content width
+                fork_token_speeds: HashMap::new(),    // [fork] token speed
             }
         });
         navigation_rail.update(cx, |rail, _| rail.set_waku(entity.downgrade()));

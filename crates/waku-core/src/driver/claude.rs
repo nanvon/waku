@@ -634,6 +634,7 @@ struct ClaudeStreamState {
     last_assistant_model: Option<String>,
     /// Last title copied from Claude's native transcript metadata.
     last_auto_title: Option<String>,
+    step_timer: super::fork_step_usage::StepTimer, // [fork] token speed
 }
 
 #[derive(Default)]
@@ -1380,7 +1381,24 @@ fn handle_message(
             if event.get("type").and_then(Value::as_str) == Some("message_start") {
                 state.saw_text_delta = false;
                 state.saw_reasoning_delta = false;
+                state.step_timer.reset(); // [fork] token speed
             }
+            // [fork] token speed: any streamed block (text, thinking, tool
+            // input) starts generation; `message_delta` carries the call's
+            // final output tokens, once per API call.
+            match event.get("type").and_then(Value::as_str) {
+                Some("content_block_delta") => state.step_timer.mark_output(),
+                Some("message_delta") => {
+                    let output = event
+                        .pointer("/usage/output_tokens")
+                        .and_then(Value::as_u64);
+                    if let Some(step) = state.step_timer.finish(output) {
+                        let _ = events.send(step);
+                    }
+                }
+                _ => {}
+            }
+            // [fork] token speed end
             let delta = event.get("delta").unwrap_or(&Value::Null);
             match delta.get("type").and_then(Value::as_str) {
                 Some("text_delta") => {

@@ -12,6 +12,7 @@ mod opencode_computer_use;
 mod pi;
 mod support;
 mod title_refresh;
+mod fork_step_usage; // [fork] token speed
 
 pub(crate) use acp::catalog_agent;
 

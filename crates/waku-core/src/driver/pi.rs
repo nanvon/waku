@@ -1263,6 +1263,7 @@ struct PiStreamState {
     message_saw_reasoning: bool,
     failed: bool,
     tools: HashMap<String, (ActivityKind, String)>,
+    step_timer: super::fork_step_usage::StepTimer, // [fork] token speed
 }
 
 fn handle_pi_message(
@@ -1401,10 +1402,18 @@ fn handle_pi_message(
             if value.pointer("/message/role").and_then(Value::as_str) == Some("assistant") {
                 state.message_saw_text = false;
                 state.message_saw_reasoning = false;
+                state.step_timer.reset(); // [fork] token speed
             }
         }
         "message_update" => {
             let update = value.get("assistantMessageEvent").unwrap_or(&Value::Null);
+            // [fork] token speed
+            if matches!(
+                update.get("type").and_then(Value::as_str),
+                Some("text_delta" | "thinking_delta" | "toolcall_delta")
+            ) {
+                state.step_timer.mark_output();
+            }
             match update.get("type").and_then(Value::as_str) {
                 Some("text_delta") => {
                     if let Some(delta) = update
@@ -1442,6 +1451,13 @@ fn handle_pi_message(
                         context_tokens: Some(tokens),
                         context_window: None,
                     });
+                }
+                // [fork] token speed
+                let output = value
+                    .pointer("/message/usage/output")
+                    .and_then(Value::as_u64);
+                if let Some(step) = state.step_timer.finish(output) {
+                    let _ = events.send(step);
                 }
                 emit_completed_message_fallback(value.get("message"), events, state);
             }

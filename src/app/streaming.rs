@@ -394,11 +394,13 @@ impl Waku {
             }
             DriverEvent::TextDelta(delta) => {
                 if self.accepts_turn_output(session_id) {
+                    self.fork_token_speed_delta(session_id, &delta); // [fork] token speed
                     self.append_text_delta(session_id, runtime, delta);
                 }
             }
             DriverEvent::ReasoningDelta(delta) => {
                 if self.accepts_turn_output(session_id) {
+                    self.fork_token_speed_delta(session_id, &delta); // [fork] token speed
                     self.append_reasoning_delta(session_id, runtime, delta);
                 }
             }
@@ -584,6 +586,11 @@ impl Waku {
                     }
                 }
             }
+            // [fork] token speed
+            DriverEvent::ForkStepUsage {
+                output_tokens,
+                generation_ms,
+            } => self.fork_token_speed_step(session_id, output_tokens, generation_ms),
             DriverEvent::UsageUpdated {
                 context_tokens,
                 context_window,

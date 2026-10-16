@@ -3481,6 +3481,7 @@ impl Waku {
                     .child(worktree_selector)
                     .children(branch_selector)
                     .child(div().flex_1())
+                    .children(self.render_fork_token_speed(cx)) // [fork] token speed
                     .children(usage_meter),
             )
     }

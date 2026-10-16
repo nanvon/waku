@@ -1356,6 +1356,7 @@ struct CodexStreamState {
     next_citation_number: usize,
     /// Item id and part index of the reasoning chunk currently streaming.
     reasoning_part: Option<(String, u64)>,
+    step_timer: super::fork_step_usage::StepTimer, // [fork] token speed
 }
 
 impl CodexStreamState {
@@ -1784,6 +1785,7 @@ fn handle_codex_message(
     match method {
         "turn/started" => {
             stream_state.begin_turn();
+            stream_state.step_timer.reset(); // [fork] token speed
             if let Some(id) = params.pointer("/turn/id").and_then(Value::as_str) {
                 *turn_id.lock() = Some(id.to_owned());
                 let mut turn_ids = turn_ids.lock();
@@ -1794,6 +1796,7 @@ fn handle_codex_message(
             let _ = events.send(DriverEvent::TurnStarted);
         }
         "item/agentMessage/delta" => {
+            stream_state.step_timer.mark_output(); // [fork] token speed
             if let Some(delta) = params.get("delta").and_then(Value::as_str) {
                 let delta = stream_state.rewrite_citation_delta(delta);
                 if !delta.is_empty() {
@@ -1807,6 +1810,7 @@ fn handle_codex_message(
                 .and_then(Value::as_str)
                 .filter(|delta| !delta.is_empty())
             {
+                stream_state.step_timer.mark_reasoning(); // [fork] token speed
                 // Codex splits reasoning into parts and numbers them, but the deltas
                 // carry no separator of their own. Concatenating them runs the parts
                 // together, which also glues the bold headers into `****`.
@@ -1929,6 +1933,25 @@ fn handle_codex_message(
                     context_window: window,
                 });
             }
+            // [fork] token speed: one notification per model call. Hidden
+            // reasoning ran before the first visible delta, outside the timed
+            // window, so its tokens are left out of the rate.
+            let last = |field: &str| {
+                usage
+                    .and_then(|usage| usage.pointer(&format!("/last/{field}")))
+                    .and_then(Value::as_u64)
+            };
+            let output = last("outputTokens").map(|output| {
+                if stream_state.step_timer.saw_reasoning() {
+                    output
+                } else {
+                    output.saturating_sub(last("reasoningOutputTokens").unwrap_or(0))
+                }
+            });
+            if let Some(step) = stream_state.step_timer.finish(output) {
+                let _ = events.send(step);
+            }
+            // [fork] token speed end
         }
         "account/rateLimits/updated" => {
             if let Some(plan) = codex_plan_usage(params.get("rateLimits")) {

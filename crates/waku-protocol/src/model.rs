@@ -1932,6 +1932,13 @@ pub enum DriverEvent {
     },
     Error(String),
     ProcessExited,
+    // [fork] token speed
+    /// One main-thread model call finished: its exact output tokens and the
+    /// time from its first streamed output to its end, measured by the driver.
+    ForkStepUsage {
+        output_tokens: u64,
+        generation_ms: u64,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, TS)]

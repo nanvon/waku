@@ -121,6 +121,14 @@ pub fn event_to_wire(event: DriverEvent) -> anyhow::Result<WireDriverEvent> {
         ),
         DriverEvent::Error(error) => ("error", Value::String(error)),
         DriverEvent::ProcessExited => ("processExited", Value::Null),
+        // [fork] token speed
+        DriverEvent::ForkStepUsage {
+            output_tokens,
+            generation_ms,
+        } => (
+            "forkStepUsage",
+            json!({ "outputTokens": output_tokens, "generationMs": generation_ms }),
+        ),
     };
     Ok(WireDriverEvent::new(kind, payload))
 }
@@ -214,6 +222,11 @@ pub fn event_from_wire(event: WireDriverEvent) -> anyhow::Result<DriverEvent> {
         }
         "error" => DriverEvent::Error(serde_json::from_value(payload)?),
         "processExited" => DriverEvent::ProcessExited,
+        // [fork] token speed
+        "forkStepUsage" => DriverEvent::ForkStepUsage {
+            output_tokens: payload["outputTokens"].as_u64().unwrap_or_default(),
+            generation_ms: payload["generationMs"].as_u64().unwrap_or_default(),
+        },
         kind => bail!("daemon sent an unsupported driver event {kind:?}"),
     })
 }

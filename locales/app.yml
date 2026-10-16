@@ -2189,3 +2189,8 @@ usage_error.unknown_error:
   en: unknown error
 usage_error.curl_no_status:
   en: curl returned no HTTP status line
+# [fork] token speed
+fork.token_speed.live:
+  en: Live
+fork.token_speed.turn:
+  en: Turn
